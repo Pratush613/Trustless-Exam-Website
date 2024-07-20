@@ -8,45 +8,26 @@ const ExamPage = () => {
   const [examStarted, setExamStarted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [puzzleSolved, setPuzzleSolved] = useState(false);
 
   useEffect(() => {
-    const fetchPuzzleStatus = async () => {
-      try {
-        const puzzleStatusResponse = await fetch('http://localhost:3000/checkPuzzleStatus');
-        if (puzzleStatusResponse.ok) {
-          const { puzzleSolvedStatus } = await puzzleStatusResponse.json();
-          setPuzzleSolved(puzzleSolvedStatus);
-        } else {
-          setError('Failed to check puzzle status.');
-        }
-      } catch (error) {
-        console.error('Failed to check puzzle status:', error);
-        setError('Failed to check puzzle status.');
-      }
-    };
-
     const fetchQuestions = async () => {
       setLoading(true);
       setExamStarted(false);
       setError('');
 
       try {
-        if (puzzleSolved) {
-          const questionsResponse = await fetch('http://localhost:3000/decryptedQuestions');
-          if (questionsResponse.ok) {
-            const data = await questionsResponse.json();
-            if (data.length > 0) {
-              setQuestions(data);
-              setExamStarted(true);
-            } else {
-              setError('No questions available.');
-            }
+        const questionsResponse = await fetch('http://localhost:3000/decryptedQuestions');
+        if (questionsResponse.ok) {
+          const data = await questionsResponse.json();
+          console.log('Fetched questions:', data);
+          if (data.length > 0) {
+            setQuestions(data);
+            setExamStarted(true);
           } else {
-            setError('Failed to fetch questions.');
+            setError('No questions available.');
           }
         } else {
-          setError('The puzzle has not been solved yet.');
+          setError('Failed to fetch questions.');
         }
       } catch (error) {
         console.error('Failed to fetch questions:', error);
@@ -56,25 +37,48 @@ const ExamPage = () => {
       }
     };
 
-    // Fetch puzzle status and then fetch questions if needed
-    const fetchAllData = async () => {
-      await fetchPuzzleStatus();
-      fetchQuestions();
-    };
+    fetchQuestions();
+  }, []);
 
-    fetchAllData();
-  }, [puzzleSolved]);
-
-  const handleAnswerSubmit = () => {
+  const handleAnswerSubmit = async () => {
     const currentQuestionId = questions[currentQuestionIndex].questionId;
-    localStorage.setItem('currentQuestionId', currentQuestionId);
+    const studentId = localStorage.getItem('studentId');
 
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
-    } else {
-      alert('You have completed the exam.');
+    if (!studentId) {
+      setError('Student ID is missing.');
+      return;
     }
-    setAnswer('');
+
+    try {
+      const response = await fetch('http://localhost:3000/transition', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          studentId,
+          questionId: currentQuestionId,
+          response: answer,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit answer.');
+      }
+
+      const result = await response.json();
+      console.log(result.message);
+
+      if (currentQuestionIndex < questions.length - 1) {
+        setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+      } else {
+        alert('You have completed the exam.');
+      }
+      setAnswer('');
+    } catch (error) {
+      console.error('Failed to submit answer:', error);
+      setError('Failed to submit answer.');
+    }
   };
 
   if (loading) {
@@ -90,17 +94,6 @@ const ExamPage = () => {
 
   if (error) {
     return <p className="text-center text-red-500">{error}</p>;
-  }
-
-  if (!puzzleSolved) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <p className="text-xl mb-4">The puzzle has not been solved yet. The exam cannot start until the puzzle is solved.</p>
-          <div className="animate-spin h-12 w-12 border-4 border-t-4 border-blue-500 border-solid rounded-full"></div>
-        </div>
-      </div>
-    );
   }
 
   if (!examStarted) {

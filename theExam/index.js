@@ -20,37 +20,50 @@ const prisma = new PrismaClient();
 app.use(express.json());
 app.use(cors());
 
-async function generateAndSolvePuzzle(targetDateTime) {
-    try {
-        // Get the current time and calculate the remaining time until the target date and time
-        const currentTime = new Date();
-        const targetTime = new Date(targetDateTime);
+async function generateAndSolvePuzzle() {
+  try {
+    // Calculate the delay (1 minute)
+    const delayMinutes = 1;
+    const delayMilliseconds = delayMinutes * 60 * 1000; // 1 minute in milliseconds
 
-        console.log('Current time:', currentTime);
-        console.log('Target time:', targetTime);
+    // Generate and solve the puzzle
+    const puzzle = await Puzzle.generate({
+      opsPerSecond: 1_300_000,
+      duration: delayMilliseconds, // Set the duration to the delay time
+      message: 'What is 2 + 2'
+    });
 
-        const remainingTime = targetTime - currentTime;
+    const solution = await Puzzle.solve(puzzle);
+    console.log('Puzzle solved:', solution);
 
-        console.log('Remaining time (ms):', remainingTime);
-
-        if (remainingTime <= 0) {
-            throw new Error('The target date and time must be in the future');
-        }
-
-        const puzzle = await Puzzle.generate({
-            opsPerSecond: 1_300_000,
-            duration: remainingTime, // Set the duration to the remaining time in milliseconds
-            message: 'What is 2 + 2' // Message for the puzzle
-        });
-
-        const solution = await Puzzle.solve(puzzle);
-        console.log('Puzzle solved:', solution);
-        return solution;
-    } catch (error) {
-        console.error('Failed to generate or solve puzzle:', error);
-        throw error; // Propagate the error for handling in the caller
-    }
+    // Start the state machine after solving the puzzle
+    startStateMachine();
+    return solution;
+  } catch (error) {
+    console.error('Failed to generate or solve puzzle:', error);
+    throw error;
+  }
 }
+
+
+
+// Function to start the state machine
+function startStateMachine() {
+  if (startTime) {
+      console.log("State machine already started");
+      return;
+  }
+
+  startTime = Date.now();
+  queue.push({ state: 'started', timestamp: startTime });
+
+  setTimeout(() => {
+      isFrozen = true;
+  }, 3 * 60 * 1000); // 3 minutes in milliseconds
+
+  console.log("State machine started");
+}
+
 
 // Endpoint to create an admin (plaintext password storage is not recommended in production)
 app.post('/adminSignup', async (req, res) => {
@@ -177,26 +190,18 @@ app.post('/studentlogin', async (req, res) => {
 // server.js or your Express app file
 app.get('/checkPuzzleStatus', async (req, res) => {
   try {
-      const targetDateTime = '2024-07-20T09:35:00';
-      const puzzleSolved = await generateAndSolvePuzzle(targetDateTime);
+    const puzzleSolved = await generateAndSolvePuzzle();
 
-      if (puzzleSolved) {
-          res.json({ puzzleSolvedStatus: true });
-      } else {
-          res.json({ puzzleSolvedStatus: false });
-      }
+    res.json({ puzzleSolvedStatus: !!puzzleSolved });
   } catch (error) {
-      console.error('Failed to check puzzle status:', error);
-      res.status(500).json({ error: 'Failed to check puzzle status' });
+    console.error('Failed to check puzzle status:', error);
+    res.status(500).json({ error: 'Failed to check puzzle status' });
   }
 });
 
-
-
 app.get('/decryptedQuestions', async (req, res) => {
   try {
-    const targetDateTime = '2024-07-20T09:35:00';
-    await generateAndSolvePuzzle(targetDateTime);
+    await generateAndSolvePuzzle(); // Generate and solve puzzle
 
     // Fetch all questions from the database
     const questions = await prisma.question.findMany({
@@ -226,6 +231,10 @@ app.get('/decryptedQuestions', async (req, res) => {
 
 
 
+
+
+
+
 const keypair = nacl.sign.keyPair();
 const queue = [];
 let startTime = null;
@@ -239,20 +248,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Start the state machine
-app.post('/start', (req, res) => {
-  if (startTime) {
-    return res.status(400).json({ message: "State machine already started" });
-  }
-  startTime = Date.now();
-  queue.push({ state: 'started', timestamp: startTime });
-
-  setTimeout(() => {
-    isFrozen = true;
-  }, 3 * 60 * 1000); // 1 minutes in milliseconds
-
-  res.json({ message: "State machine started" });
-});
 
 // Transition to a new state
 app.post('/transition', (req, res) => {
