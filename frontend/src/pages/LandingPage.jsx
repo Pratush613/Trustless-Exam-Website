@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -10,6 +11,10 @@ const LandingPage = () => {
 
   const handleStudentClick = () => {
     navigate('/student');
+  };
+
+  const handleAllUsersClick = () => {
+    navigate('/users');
   };
 
   return (
@@ -28,6 +33,12 @@ const LandingPage = () => {
             className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-300"
           >
             Student
+          </button>
+          <button
+            onClick={handleAllUsersClick}
+            className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition duration-300"
+          >
+            All Users
           </button>
         </div>
       </div>

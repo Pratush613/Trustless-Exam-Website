@@ -1,4 +1,3 @@
-
 import './App.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import AdminPage from './pages/AdminPage';
@@ -7,6 +6,8 @@ import LandingPage from './pages/LandingPage';
 import Login from './components/AdminLogin'; 
 import QuestionSet from './pages/QuestionSet'; 
 import ExamPage from './pages/ExamPage';
+import QueueVerifyToggle from './pages/QueueVerifyButtons'
+import VerifyForm from './components/VerifyForm'
 
 function App() {
   return (
@@ -19,6 +20,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/questionset" element={<QuestionSet />} />
           <Route path="/ExamPage" element={<ExamPage />} />
+          <Route path="/users" element ={<QueueVerifyToggle />} />
+          <Route path="/verify" element ={<VerifyForm />} />
         </Routes>
       </Router>
     </>

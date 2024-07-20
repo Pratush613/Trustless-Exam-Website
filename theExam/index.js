@@ -187,17 +187,6 @@ app.post('/studentlogin', async (req, res) => {
   }
 });
 
-// server.js or your Express app file
-app.get('/checkPuzzleStatus', async (req, res) => {
-  try {
-    const puzzleSolved = await generateAndSolvePuzzle();
-
-    res.json({ puzzleSolvedStatus: !!puzzleSolved });
-  } catch (error) {
-    console.error('Failed to check puzzle status:', error);
-    res.status(500).json({ error: 'Failed to check puzzle status' });
-  }
-});
 
 app.get('/decryptedQuestions', async (req, res) => {
   try {
