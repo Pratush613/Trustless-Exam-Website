@@ -8,6 +8,7 @@ import QuestionSet from './pages/QuestionSet';
 import ExamPage from './pages/ExamPage';
 import QueueVerifyToggle from './pages/QueueVerifyButtons'
 import VerifyForm from './components/VerifyForm'
+import ResultsPage from './pages/ResultsPage'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/ExamPage" element={<ExamPage />} />
           <Route path="/users" element ={<QueueVerifyToggle />} />
           <Route path="/verify" element ={<VerifyForm />} />
+          <Route path="/results" element ={<ResultsPage />} />
         </Routes>
       </Router>
     </>

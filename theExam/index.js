@@ -190,7 +190,7 @@ app.post('/studentlogin', async (req, res) => {
 
 app.get('/decryptedQuestions', async (req, res) => {
   try {
-    await generateAndSolvePuzzle(); // Generate and solve puzzle
+    //await generateAndSolvePuzzle(); // Generate and solve puzzle
 
     // Fetch all questions from the database
     const questions = await prisma.question.findMany({
@@ -217,11 +217,6 @@ app.get('/decryptedQuestions', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch and decrypt questions', details: error.message });
   }
 });
-
-
-
-
-
 
 
 const keypair = nacl.sign.keyPair();
@@ -274,6 +269,47 @@ app.post('/verifyStateMachine', (req, res) => {
   res.json({ isValid, studentId, questionId, response });
 });
 
+app.post('/results', async (req, res) => {
+  try {
+    const responses = req.body; // Array of responses
+    let studentResults = {};
+
+    for (let response of responses) {
+      const { studentId, questionId, response: userResponse } = response;
+
+      // Fetch the correct answer from the database
+      const correctAnswerRecord = await prisma.answer.findFirst({
+        where: { questionId },
+      });
+
+      if (!correctAnswerRecord) {
+        return res.status(404).json({ error: `Correct answer for question ${questionId} not found` });
+      }
+
+      // Decrypt the correct answer
+      const correctAnswer = decrypt(correctAnswerRecord.answer, key, iv);
+
+      // Initialize student's score if not already done
+      if (!studentResults[studentId]) {
+        studentResults[studentId] = { correct: 0, wrong: 0, score: 0 };
+      }
+
+      // Compare responses and calculate score
+      if (userResponse === correctAnswer) {
+        studentResults[studentId].correct += 1;
+        studentResults[studentId].score += 4;
+      } else {
+        studentResults[studentId].wrong += 1;
+        studentResults[studentId].score -= 1;
+      }
+    }
+
+    res.json(studentResults);
+  } catch (error) {
+    console.error('Error verifying state machine:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 
 // Get the state queue

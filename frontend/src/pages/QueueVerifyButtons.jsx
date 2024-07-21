@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import QueueData from '../components/QueueData';
@@ -26,10 +24,14 @@ const QueueVerifyButtons = () => {
     navigate('/verify');
   };
 
+  const handleResultsClick = () => {
+    navigate('/results');
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <div className="text-center">
-        <h1 className="text-4xl font-bold mb-8">Queue and Verify Buttons</h1>
+        <h1 className="text-4xl font-bold mb-8">Queue, Verify and Results Buttons</h1>
         <div className="space-x-4">
           <button
             onClick={handleQueueClick}
@@ -42,6 +44,12 @@ const QueueVerifyButtons = () => {
             className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-300"
           >
             Verify
+          </button>
+          <button
+            onClick={handleResultsClick}
+            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-300"
+          >
+            Results
           </button>
         </div>
         <QueueData data={queueData} />

@@ -1,28 +1,18 @@
-
-
 import React, { useState } from 'react';
 
 const VerifyForm = () => {
-  const [formData, setFormData] = useState({
-    studentId: '',
-    questionId: '',
-    response: '',
-    timestamp: '',
-    signature: ''
-  });
+  const [jsonInput, setJsonInput] = useState('');
   const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    setJsonInput(e.target.value);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const formData = JSON.parse(jsonInput); // Parse the JSON input
       const response = await fetch('http://localhost:3000/verifyStateMachine', {
         method: 'POST',
         headers: {
@@ -38,8 +28,10 @@ const VerifyForm = () => {
       const data = await response.json();
       console.log('Verification response:', data);
       setResult(data);
+      setError(null);
     } catch (error) {
       console.error('Error verifying state machine:', error);
+      setError('Invalid JSON format or network error.');
     }
   };
 
@@ -48,49 +40,12 @@ const VerifyForm = () => {
       <div className="text-center">
         <h1 className="text-4xl font-bold mb-8">Verify State Machine</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            name="studentId"
-            placeholder="Student ID"
-            value={formData.studentId}
+          <textarea
+            name="jsonInput"
+            placeholder='{"studentId": "", "questionId": "", "response": "", "timestamp": "", "signature": ""}'
+            value={jsonInput}
             onChange={handleChange}
-            className="border py-2 px-4 rounded"
-            required
-          />
-          <input
-            type="text"
-            name="questionId"
-            placeholder="Question ID"
-            value={formData.questionId}
-            onChange={handleChange}
-            className="border py-2 px-4 rounded"
-            required
-          />
-          <input
-            type="text"
-            name="response"
-            placeholder="Response"
-            value={formData.response}
-            onChange={handleChange}
-            className="border py-2 px-4 rounded"
-            required
-          />
-          <input
-            type="text"
-            name="timestamp"
-            placeholder="Timestamp"
-            value={formData.timestamp}
-            onChange={handleChange}
-            className="border py-2 px-4 rounded"
-            required
-          />
-          <input
-            type="text"
-            name="signature"
-            placeholder="Signature"
-            value={formData.signature}
-            onChange={handleChange}
-            className="border py-2 px-4 rounded"
+            className="border py-2 px-4 rounded w-full h-64"
             required
           />
           <button
@@ -100,6 +55,11 @@ const VerifyForm = () => {
             Verify
           </button>
         </form>
+        {error && (
+          <div className="mt-4 text-red-500">
+            {error}
+          </div>
+        )}
         {result && (
           <div className="mt-8">
             <h2 className="text-2xl font-bold mb-4">Result</h2>
