@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+
 
 const VerifyForm = () => {
   const [jsonInput, setJsonInput] = useState('');
@@ -13,7 +14,7 @@ const VerifyForm = () => {
     e.preventDefault();
     try {
       const formData = JSON.parse(jsonInput); // Parse the JSON input
-      const response = await fetch('http://localhost:3000/verifyStateMachine', {
+      const response = await fetch(`http://localhost:3000/verifyStateMachine`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

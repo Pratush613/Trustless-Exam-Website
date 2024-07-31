@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import QueueData from '../components/QueueData';
+
 
 const QueueVerifyButtons = () => {
   const [queueData, setQueueData] = useState([]);
@@ -8,7 +9,7 @@ const QueueVerifyButtons = () => {
 
   const handleQueueClick = async () => {
     try {
-      const response = await fetch('http://localhost:3000/queue');
+      const response = await fetch(`http://localhost:3000/queue`);
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }

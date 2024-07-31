@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+
 
 const ResultsPage = () => {
   const [jsonInput, setJsonInput] = useState('');
@@ -12,7 +13,7 @@ const ResultsPage = () => {
     e.preventDefault();
     try {
       const responses = JSON.parse(jsonInput);
-      const response = await fetch('http://localhost:3000/results', {
+      const response = await fetch(`http://localhost:3000/results`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

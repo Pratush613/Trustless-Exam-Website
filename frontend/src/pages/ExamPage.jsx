@@ -1,7 +1,9 @@
+import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
-import React, { useState, useEffect } from 'react';
 
 const ExamPage = () => {
+  const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answer, setAnswer] = useState('');
@@ -16,7 +18,7 @@ const ExamPage = () => {
       setError('');
 
       try {
-        const questionsResponse = await fetch('http://localhost:3000/decryptedQuestions');
+        const questionsResponse = await fetch(`http://localhost:3000/decryptedQuestions`);
         if (questionsResponse.ok) {
           const data = await questionsResponse.json();
           console.log('Fetched questions:', data);
@@ -50,7 +52,7 @@ const ExamPage = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/transition', {
+      const response = await fetch(`http://localhost:3000/transition`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -83,10 +85,10 @@ const ExamPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-screen bg-gradient-to-r from-green-200 via-blue-200 to-purple-200">
         <div className="text-center">
-          <p className="text-xl mb-4">Loading...</p>
-          <div className="animate-spin h-12 w-12 border-4 border-t-4 border-blue-500 border-solid rounded-full"></div>
+          <p className="text-xl mb-4 text-gray-800">Loading...</p>
+          <div className="animate-spin h-12 w-12 border-4 border-t-4 border-blue-500 border-solid rounded-full mx-auto"></div>
         </div>
       </div>
     );
@@ -97,41 +99,56 @@ const ExamPage = () => {
   }
 
   if (!examStarted) {
-    return <p className="text-center text-xl">The exam has not yet started.</p>;
+    return <p className="text-center text-xl text-gray-800">The exam has not yet started.</p>;
   }
 
   if (questions.length === 0) {
-    return <p className="text-center text-xl">No questions available.</p>;
+    return <p className="text-center text-xl text-gray-800">No questions available.</p>;
   }
 
   const currentQuestion = questions[currentQuestionIndex];
 
   return (
-    <div className="max-w-lg mx-auto p-4 bg-white shadow-md rounded-lg">
-      <h2 className="text-2xl font-bold mb-4">Question {currentQuestionIndex + 1}</h2>
-      <div className="space-y-4">
-        <p>{currentQuestion.question}</p>
-        {['option1', 'option2', 'option3', 'option4'].map((optionKey, index) => (
-          <div key={index}>
-            <label className="block text-sm font-medium text-gray-700">Option {index + 1}</label>
-            <input
-              type="radio"
-              name="answer"
-              value={currentQuestion[optionKey]}
-              checked={answer === currentQuestion[optionKey]}
-              onChange={() => setAnswer(currentQuestion[optionKey])}
-              className="mr-2"
-            />
-            <span>{currentQuestion[optionKey]}</span>
-          </div>
-        ))}
+    <div className="flex flex-col min-h-screen bg-gradient-to-r from-green-200 via-blue-200 to-purple-200 p-4">
+      {/* Header */}
+      <header className="flex items-center justify-between p-4 mb-4 bg-gradient-to-r from-gray-800 to-gray-900 text-white shadow-md rounded-xl">
+        <h1 className="text-xl font-bold">Exam Questions</h1>
         <button
-          onClick={handleAnswerSubmit}
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+          onClick={() => navigate('/')}
+          className="bg-gray-800 hover:bg-gray-700 text-white py-2 px-4 rounded-lg shadow-lg"
         >
-          Submit Answer
+          Go Back to Home
         </button>
-      </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-grow flex items-center justify-center">
+        <div className="max-w-lg mx-auto p-6 bg-white shadow-lg rounded-lg border border-gray-200 ">
+          <h2 className="text-2xl font-bold mb-6 text-gray-800">Question {currentQuestionIndex + 1}</h2>
+          <div className="space-y-4">
+            <p>{currentQuestion.question}</p>
+            {['option1', 'option2', 'option3', 'option4'].map((optionKey, index) => (
+              <div key={index} className="flex items-center">
+                <input
+                  type="radio"
+                  name="answer"
+                  value={currentQuestion[optionKey]}
+                  checked={answer === currentQuestion[optionKey]}
+                  onChange={() => setAnswer(currentQuestion[optionKey])}
+                  className="mr-2"
+                />
+                <span>{currentQuestion[optionKey]}</span>
+              </div>
+            ))}
+            <button
+              onClick={handleAnswerSubmit}
+              className="w-full px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-300"
+            >
+              Submit Answer
+            </button>
+          </div>
+        </div>
+      </main>
     </div>
   );
 };

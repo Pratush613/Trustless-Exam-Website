@@ -1,8 +1,7 @@
+import { useState } from 'react';
 
 
-import React, { useState } from 'react';
-
-const StudentSignUp = () => {
+const StudentSignUp = ({ isDarkMode }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
@@ -12,7 +11,7 @@ const StudentSignUp = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:3000/studentSignup', {
+      const response = await fetch(`http://localhost:3000/studentSignup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -36,24 +35,24 @@ const StudentSignUp = () => {
   };
 
   return (
-    <form onSubmit={handleSignUp} className="space-y-4">
+    <form onSubmit={handleSignUp} className={`space-y-4 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
       <div>
-        <label className="block text-gray-700 text-sm font-bold mb-2">Username</label>
+        <label className="block text-sm font-bold mb-2">Username</label>
         <input
           type="text"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          className="w-full px-3 py-2 border rounded"
+          className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 ${isDarkMode ? 'bg-gray-800 border-gray-600 text-white focus:ring-blue-500' : 'bg-white border-gray-300 text-gray-800 focus:ring-blue-500'}`}
           required
         />
       </div>
       <div>
-        <label className="block text-gray-700 text-sm font-bold mb-2">Password</label>
+        <label className="block text-sm font-bold mb-2">Password</label>
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-3 py-2 border rounded"
+          className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 ${isDarkMode ? 'bg-gray-800 border-gray-600 text-white focus:ring-blue-500' : 'bg-white border-gray-300 text-gray-800 focus:ring-blue-500'}`}
           required
         />
       </div>
